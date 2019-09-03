@@ -14,7 +14,7 @@ In the script attached, I built a web-scraper for the crossfit.com daily workout
 The script contains some basic data management and cleaning for the scraped text.
 
 ## **Analysis 1:** Cardio Heatmap
-How often do Crossfiters do cardio? Let us see on the following heatmap. Red color indicates more cardio exercises in the workout.
+How often do Crossfiters do cardio? Let us see on the following heatmap. The darker the color, the more cardio exercises occured in the workout.
 
 ![Crossfit: Cardio Heatmap](Heatmap_CardioCalendar.png)
 
