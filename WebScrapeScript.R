@@ -1,5 +1,5 @@
 ### Crossfit Web Scraping Project ###
-### Tutorial: https://www.datacamp.com/community/tutorials/r-web-scraping-rvest?utm_campaign=News&utm_medium=Community&utm_source=DataCamp.com
+### Source tutorial: https://www.datacamp.com/community/tutorials/r-web-scraping-rvest?utm_campaign=News&utm_medium=Community&utm_source=DataCamp.com
 
 # General-purpose data wrangling
 library(dplyr)
@@ -26,11 +26,10 @@ library(ggplot2)
 # date manipulation
 #install.package("zoo")
 library(zoo)
-#rm(list = ls())
 
 
 
-# Webscraping Function
+# Webscraping Function -----------------------------------------------------------------------------
 get_wods <- function(date_start, date_end){
   url <- "https://crossfit.com/workout/"
   
@@ -45,7 +44,8 @@ get_wods <- function(date_start, date_end){
   wod_text <- list()
   for(i in 1:length(a$new_url)){
     html[[i]] <- read_html(a$new_url[i])
-    wod[[i]] <- html_nodes(html[[i]], xpath = paste0("//*[@id=\"", a$year[i], a$month[i], a$day[i], "\"]/div/div[2]/div", sep = ""))
+    wod[[i]] <- html_nodes(html[[i]], xpath = paste0("//*[@id=\"", a$year[i], a$month[i], a$day[i], 
+                                                     "\"]/div/div[2]/div", sep = ""))
     wod_text[[i]] <- html_text(wod[[i]])
     doc_id[i] <- i
   }
@@ -64,7 +64,7 @@ get_wods <- function(date_start, date_end){
 
 wods <- get_wods(date_start = "2013/01/01", date_end = "2018/01/01")
 
-# Data Cleaning
+# Data Cleaning -----------------------------------------------------------------------------------
 clean_corpus <- function(corpus){
   corpus <- tolower(corpus)
   corpus <- removePunctuation(corpus)
@@ -79,7 +79,7 @@ clean_wods$text <- clean_corpus(clean_wods$text)
 
 
 
-# Rest Days
+# Exercises -------------------------------------------------------------------------------------------
 rest <- mapply(grepl, "rest day", clean_wods$text)
 run <- mapply(grepl, "run", clean_wods$text)
 row <- mapply(grepl, "row", clean_wods$text)
@@ -93,7 +93,9 @@ wods_classified <- cbind(clean_wods,
                    bike = as.numeric(bike),
                    rope = as.numeric(rope))
 
-wods_classified$monthf <- factor(wods_classified$month, labels=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"),ordered=TRUE)
+wods_classified$monthf <- factor(wods_classified$month, labels=c("Jan","Feb","Mar","Apr","May","Jun",
+                                                                 "Jul","Aug","Sep","Oct","Nov","Dec"),
+                                 ordered=TRUE)
 wods_classified$dmy <- dmy(paste0(wods_classified$day, "-", wods_classified$month, "-", wods_classified$year))
 wods_classified$weekday <- as.POSIXlt(wods_classified$dmy)$wday
 wods_classified$weekday <- factor(wods_classified$weekday,
@@ -108,6 +110,7 @@ wods_classified$week <- as.numeric(format(wods_classified$dmy,"%U"))
 wods_cleaned <- ddply(wods_classified,.(yearmonth), transform, monthweek = 1 + week - min(week))
 wods_cleaned$cardio <- wods_cleaned$run + wods_cleaned$row + wods_cleaned$bike + wods_cleaned$rope
 
+# Visualization of Cardio --------------------------------------------------------------------------------
 ## Calendar Example : https://www.r-bloggers.com/ggplot2-time-series-heatmaps/
 wods_cleaned %>%
   filter(year %in% c("2013", "2014", "2015", "2016", "2017")) %>%
@@ -124,20 +127,4 @@ wods_cleaned %>%
         legend.position = "none"
       )
 ggsave("Heatmap_CardioCalendar.png", width = 10)
-
-
-
-
-
-
-df_source <- VectorSource(clean_wods$text)
-df_corpus <- VCorpus(df_source)
-wod_tdm <- TermDocumentMatrix(df_corpus)
-wod_m <- as.matrix(wod_tdm)
-
-# Word Frequency
-
-head(sort(rowSums(wod_m), decreasing = T), n = 20)
-
-
 
