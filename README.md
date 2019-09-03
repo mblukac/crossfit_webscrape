@@ -1,4 +1,4 @@
-# Text Analytics: Crossfit Project
+# Crossfit Project: Web-scraping and Text Analytics
 
 Welcome to my Crossfit project!
 
